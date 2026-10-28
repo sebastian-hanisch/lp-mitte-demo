@@ -197,7 +197,7 @@ def verdict_e1_example(rows: list[dict]) -> tuple[str, str]:
 
 def verdict_e1_axis(normal: dict, lognormal: dict, two: dict) -> tuple[str, str]:
     """E1, Achse: wie oft läuft der Pfad von p = 1 bis ∞ ohne Rückschritt? (Zellen für dasselbe n)"""
-    return "warning", (f"Der Pfad ist **stetig, aber nicht monoton**: Bei {normal['n']} normalverteilten Werten läuft er nur in {pct(normal['strict'][0], 0)} % der Instanzen von p = 1 bis ∞ ohne Rückschritt, "
+    return "warning", (f"Der Pfad ist **stetig, aber in den meisten Layouts nicht monoton**: Bei {normal['n']} normalverteilten Werten läuft er nur in {pct(normal['strict'][0], 0)} % der Instanzen von p = 1 bis ∞ ohne Rückschritt, "
                        f"bei zwei Häufungen in {pct(two['strict'][0], 0)} % (bis p = 8: {pct(two['strict_to_8'][0], 0)} %), bei lognormalen Werten in {pct(lognormal['strict'][0], 0)} %. "
                        f"Die Rückschritte sind klein: im Mittel {de(100 * normal['back_mean'], 2)} % der Spannweite (Normal), höchstens {de(100 * normal['back_max'], 1)} % in der ungünstigsten Instanz.")
 
@@ -233,7 +233,7 @@ def verdict_e3(rows: list[dict]) -> tuple[str, str]:
     """E3: Abstand des Außenpostens; Regret von p = 1, bewertet nach dem längsten Weg."""
     at = {r["a"]: r["mean"][0][2] for r in rows}
     return "info", (f"Der Regret von p = 1, bewertet nach dem längsten Weg, liegt bei a = 2 noch bei {de(at[2.0], 1)} %, bei a = 3 bei {de(at[3.0], 1)} % und bei a = 6 bei {de(at[6.0], 1)} %: "
-                    "Zwischen a = 2 und a = 3 kippt das 1-Center (eine feinere Bestimmung der Schwelle ist nicht untersucht).")
+                    "Zwischen a = 2 und a = 3 kippt das 1-Center (bei 30 normalverteilten Kunden um den Ursprung; eine feinere Bestimmung der Schwelle ist nicht untersucht).")
 
 
 def verdict_e4(cells: list[dict]) -> tuple[str, str]:
@@ -257,7 +257,7 @@ def verdict_e6_density(cell: dict) -> tuple[str, str]:
     """E6, Dichte gegen Masse (eine Zelle: Streuung der großen Häufung)."""
     at = {r["p"]: r["mean"] for r in cell["rows"]}
     return "success", (f"60 % der Werte streuen mit {cell['s_big']:g} um 0, 40 % liegen dicht (Streuung 0,5) um 8. Die Mitte liegt in der kleinen, dichten Häufung in {pct(at[1.0], 0)} % der Instanzen bei p = 1, "
-                       f"in {pct(at[0.7], 0)} % bei p = 0,7, in {pct(at[0.5], 0)} % bei p = 0,5 und in {pct(at[0.3], 0)} % bei p = 0,3: Mit p gegen 0 wählt die Mitte die dichteste Stelle, auch gegen die Mehrheit der Werte.")
+                       f"in {pct(at[0.7], 0)} % bei p = 0,7, in {pct(at[0.5], 0)} % bei p = 0,5 und in {pct(at[0.3], 0)} % bei p = 0,3: Mit p gegen 0 wählt die Mitte die dichteste Stelle, auch gegen die Mehrheit der Werte, sofern die Mehrheit weit genug streut (bei Streuung 0,5 und 1 geschieht das für kein p).")
 
 
 def verdict_e6_start(rows: list[dict]) -> tuple[str, str]:

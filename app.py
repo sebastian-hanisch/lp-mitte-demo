@@ -101,7 +101,7 @@ st.markdown(
     """
 **Stück 3 der Reihe „Mittelwerte und Lagemaße“.** Ein Lager soll Kunden in der Ebene beliefern. Wo es steht, hängt davon ab, **wie ein langer Weg bestraft wird**: Die **Lp-Mitte** minimiert die Summe der Wege hoch **p**.
 Bei p = 2 ist das der Schwerpunkt, bei p = 1 der geometrische Median, für sehr große p der Mittelpunkt des kleinsten umschließenden Kreises, und für p < 1 zählt fast nur noch, *wer nicht dort ist*.
-Die Demo zeigt, **wohin die Mitte läuft**, **was die Wahl in den anderen Kriterien kostet** (die Regret-Matrix), warum es **kein p gibt, das überall gut ist**, wie die Mitte für p < 1 zur dichtesten Stelle springt und warum die **Gewichtsiteration** ab p = 4 nicht mehr konvergiert.
+Die Demo zeigt, **wohin die Mitte läuft**, **was die Wahl in den anderen Kriterien kostet** (die Regret-Matrix), warum es **kein p gibt, das für alle drei Kriterien optimal ist**, wie die Mitte für p < 1 zur dichtesten Stelle springen kann (wenn die Mehrheit weit streut und p klein genug ist) und warum die **Gewichtsiteration** in der Ebene ohne Dämpfung ab p = 4 nicht mehr konvergiert.
 Abgrenzung: Die [p-center-demo](https://github.com/sebastian-hanisch/p-center-demo) wählt *mehrere* Mittelpunkte aus diskreten Kandidaten (dort ist p die *Zahl der Mittelpunkte*), die [kmeans-demo](https://github.com/sebastian-hanisch/kmeans-demo) vergleicht Mittelwert und Medoid, die [standortplanung-demo](https://github.com/sebastian-hanisch/standortplanung-demo) arbeitet mit diskreten Kandidaten.
 
 **Der Buchstabe p.** In dieser Demo heißt **p immer der Exponent der Strecke**; die Zahl der Mittelpunkte kommt hier nicht vor (es gibt genau eine Mitte), und das Maximum-Ende heißt „1-Center“, nicht „p-Center“. Das Bewertungskriterium trägt den Buchstaben **q**.
@@ -115,9 +115,9 @@ with st.expander("So funktioniert die Lp-Mitte", expanded=True):
         r"""
 1. **Was gesucht ist.** Ein Punkt $c$, der $\sum_i \|x_i - c\|^p$ klein macht: die Summe aller Kunden-Wege, jeder Weg hoch $p$ (gleiche Gewichte, Luftlinie).
 2. **Drei bekannte Stellen.** $p = 2$: der **Schwerpunkt** (Mittelwert). $p = 1$: der **geometrische Median** (Weber-Punkt, Stück 5 der Reihe). $p \to \infty$: die Mitte des **kleinsten umschließenden Kreises** (1-Center), der Punkt, der den *längsten* Weg klein macht.
-3. **Dazwischen ein Pfad.** Für $p \ge 1$ gibt es genau eine Mitte $c(p)$, und sie läuft stetig mit $p$. Sie läuft aber **nicht immer in eine Richtung** (E1).
+3. **Dazwischen ein Pfad.** Für $p > 1$ gibt es genau eine Mitte $c(p)$ (bei $p = 1$ meist genau eine, bei geradem $n$ auf der Achse ein Intervall), und sie läuft stetig mit $p$. Sie läuft aber in den meisten Layouts **nicht immer in eine Richtung** (E1).
 4. **Drei Kriterien.** Wie gut eine Mitte ist, hängt davon ab, woran man sie misst: Summe der Wege ($q = 1$), Quadratsumme ($q = 2$) oder längster Weg ($q = \infty$). Jede Wahl von $p$ ist für ein anderes $q$ optimal; die **Regret-Matrix** zeigt, wie viel Mehrkosten die Wahl in den anderen Kriterien kostet (E2).
-5. **Unter 1 wird es anders.** Für $p < 1$ ist die Zielfunktion nicht mehr konvex: Jeder Kunde ist ein lokales Minimum, die Mitte ist meist ein Kunde und springt zur **dichtesten** Stelle (E6).
+5. **Unter 1 wird es anders.** Für $p < 1$ ist die Zielfunktion nicht mehr konvex: Jeder Kunde ist ein lokales Minimum, die Mitte ist meist ein Kunde und springt zur **dichtesten** Stelle, wenn die Mehrheit weit streut und $p$ klein genug ist (E6).
         """
     )
 
@@ -207,8 +207,8 @@ with st.expander("🧰 Die Löser und die drei Kriterien erklärt"):
 | Verfahren | Was es tut | Was schiefgehen kann |
 |---|---|---|
 | **Newton** | Gedämpftes Newton-Verfahren (Armijo-Rückverfolgung) auf $\sum \|x_i - c\|^p$, für $p > 1$ | Braucht Rechnen in normierten Koordinaten, sonst Überlauf bei großem $p$; findet bei $p < 1$ nichts (nicht konvex). |
-| **Gewichtsiteration ohne Dämpfung** | Neuer Punkt = Schwerpunkt mit Gewichten $w_i = d_i^{p-2}$ ($d_i$ = Abstand zu Kunde $i$) | Gemessen: konvergiert für $p \le 2{,}5$, bei $p = 3$ nur mit Vorbehalt, bei $p \ge 4$ nie (E7). Bei $p = 1$ ist das Weiszfeld-Verfahren. |
-| **Gewichtsiteration mit Dämpfung** | Wie oben, aber nur der Bruchteil $1/(p-1)$ des Schritts | Gemessen: konvergiert in allen Läufen, braucht mehr Schritte als Newton. |
+| **Gewichtsiteration ohne Dämpfung** | Neuer Punkt = Schwerpunkt mit Gewichten $w_i = d_i^{p-2}$ ($d_i$ = Abstand zu Kunde $i$) | Gemessen (in der Ebene, 3 < p < 4 nicht gemessen): konvergiert für $p \le 2{,}5$, bei $p = 3$ nur mit Vorbehalt, bei $p \ge 4$ nie (E7). Bei $p = 1$ ist das Weiszfeld-Verfahren. |
+| **Gewichtsiteration mit Dämpfung** | Wie oben, aber nur der Bruchteil $1/(p-1)$ des Schritts (erst ab $p > 2$, darunter ungedämpft) | Gemessen: konvergiert in allen Läufen, braucht mehr Schritte als Newton. |
 | **Vardi–Zhang** ($p = 1$) | Weiszfeld-Schritt mit Behandlung des Kunden, auf dem der Iterat steht (Stück 5 der Reihe) | Langsam nahe der Schwelle zwischen „Mitte zwischen den Kunden“ und „Mitte auf einem Kunden“. |
 | **Kleinster umschließender Kreis** ($p = \infty$) | Inkrementelle Fassung nach Welzl: Kreis über zwei oder drei Kunden | Eindeutig; hängt allein von den äußersten Kunden ab. |
 
@@ -233,7 +233,7 @@ st.subheader("🔬 E1: Der Pfad der Mitte")
 st.markdown("**Zahlenbeispiel auf der Achse.** Die Werte 1 bis 9 und 40, exakt gerechnet. Bei zehn Werten ist die Mitte für p = 1 kein Punkt, sondern das Intervall der Mediane (die Bilder legen sie in die Intervallmitte).")
 st.plotly_chart(build_example_path(R.example()["rows"]), width="stretch", key="e1_example")
 _verdict(V.verdict_e1_example(R.example()["rows"]))
-st.markdown(f"**Stetig, aber nicht monoton.** „Strikt“ heißt: Die Mitte läuft von p = 1 bis p = ∞ nie gegen ihre Gesamtrichtung. Mittel über vier Zufalls-Seeds, {R.axis_cells()[0]['runs_per_seed']} Instanzen je Seed und Zelle.")
+st.markdown(f"**Stetig, aber in den meisten Layouts nicht monoton.** „Strikt“ heißt: Die Mitte läuft von p = 1 bis p = ∞ nie gegen ihre Gesamtrichtung. Mittel über vier Zufalls-Seeds, {R.axis_cells()[0]['runs_per_seed']} Instanzen je Seed und Zelle.")
 _fmt_table([{"Layout": c["layout"], "n": c["n"], "strikt (%)": 100 * c["strict"][0], "strikt bis p = 8 (%)": 100 * c["strict_to_8"][0], "Rückschritt im Mittel (% der Spannweite)": 100 * c["back_mean"],
              "größter Rückschritt (% der Spannweite)": 100 * c["back_max"]} for c in R.axis_cells()],
            **{"strikt (%)": "%.0f %%", "strikt bis p = 8 (%)": "%.0f %%", "Rückschritt im Mittel (% der Spannweite)": "%.2f %%", "größter Rückschritt (% der Spannweite)": "%.1f %%"})
@@ -369,7 +369,7 @@ st.markdown(
 | **Simulierte Layouts** | Alle Häufigkeiten und Raten stammen aus den vier Layouts dieser Demo; echte Kundenlagen können davon stark abweichen. | – |
 | **Kompromiss-p nur für ein Raster** | Das beste p stammt aus neun Werten {1; 1,5; 2; 3; 4; 6; 8; 16; ∞}, vier Layouts und n = 10, 30, 100; dazwischen und für andere Layouts ist es nicht untersucht. | – |
 | **p < 1 mit @@STARTS@@ Zufallsstarts** | In der Ebene werden alle Kunden und @@STARTS@@ Zufallsstarts verglichen: das beste von endlich vielen Kandidaten, kein Beweis des globalen Minimums. | – |
-| **Konvergenz nur gemessen** | „Gewichtsiteration konvergiert ab p = 4 nicht“ ist eine Messung an @@IRLS@@ Instanzen je Layout und p, kein Beweis. | – |
+| **Konvergenz nur gemessen** | „Gewichtsiteration konvergiert ab p = 4 nicht“ ist eine Messung in der Ebene an @@IRLS@@ Instanzen je Layout und p, kein Beweis; für 3 < p < 4 und höhere Dimensionen nicht gemessen. | – |
 | **Streuung zwischen den Seeds** | Jede Zelle nutzt vier feste Seeds; die angegebene Streuung ist die zwischen diesen Seeds, kein Konfidenzintervall. | – |
 | **Exponent und Norm** | p ist der Exponent der Strecke, nicht die Norm der Strecke; die Strecke bleibt die euklidische Luftlinie. | – |
     """.replace("@@IRLS@@", str(R.irls_cell("Normal")["runs_per_seed"] * len(R.meta()["seeds"]))).replace("@@STARTS@@", str(C.STARTS_BELOW_ONE))
